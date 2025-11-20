@@ -5,10 +5,16 @@ const apiKey = process.env.API_KEY || '';
 const ai = new GoogleGenAI({ apiKey });
 
 export const generateBenchmarks = async (data: StartupData): Promise<Benchmark[]> => {
+  const apiKey = import.meta.env.VITE_API_KEY;
+
   if (!apiKey) {
-    console.warn("No API Key provided. Returning mock data.");
+    console.warn("⚠️ VITE_API_KEY no encontrada en el entorno");
     return getMockBenchmarks();
   }
+
+  // Aquí iría tu lógica real con la API
+};
+
 
   const prompt = `
     Genera 6 benchmarks de startups realistas y comparables para una compañía en etapa ${data.stage} en la industria ${data.industry} (Modelo: ${data.businessModel}) ubicada en ${data.country}.
