@@ -1,363 +1,47 @@
-import React, { useState } from "react";
-import {
-  BusinessModel,
-  Stage,
-  StartupData,
-  Benchmark,
-  RiskAdjustments,
-  ValuationResult,
-} from "./types";
-import { calculateValuation } from "./utils";
-import { generateBenchmarks } from "./services/geminiService";
-import InputForm from "./components/InputForm";
-import BenchmarkTable from "./components/BenchmarkTable";
-import ResultsView from "./components/ResultsView";
+import React from "react";
 import RoadLogo from "./components/RoadLogo";
-import {
-  ChevronRight,
-  Check,
-  Layers,
-  Sliders,
-  PieChart,
-  AlertTriangle,
-} from "lucide-react";
-
-// Estado inicial de los datos de la startup
-const initialData: StartupData = {
-  industry: "",
-  businessModel: BusinessModel.SAAS,
-  country: "USA",
-  stage: Stage.PRE_SEED,
-  foundingDate: "",
-  mrr: 0,
-  mrrGrowth: 0,
-  activeUsers: 0,
-  retentionRate: 0,
-  cac: 0,
-  ltv: 0,
-  burnRate: 0,
-  runwayMonths: 12,
-  lastRevenue: 0,
-  tam: 0,
-  sam: 0,
-  som: 0,
-  raisedCapital: 0,
-  seekingCapital: 0,
-  equityOffered: 0,
-};
-
-const initialAdjustments: RiskAdjustments = {
-  teamQuality: "duo",
-  marketRisk: "medium",
-  productStage: "beta",
-  competition: "moderate",
-};
 
 const App: React.FC = () => {
-  const [step, setStep] = useState(1);
-  const [data, setData] = useState<StartupData>(initialData);
-  const [adjustments, setAdjustments] =
-    useState<RiskAdjustments>(initialAdjustments);
-  const [benchmarks, setBenchmarks] = useState<Benchmark[]>([]);
-  const [loadingBenchmarks, setLoadingBenchmarks] = useState(false);
-  const [valuationResult, setValuationResult] =
-    useState<ValuationResult | null>(null);
-
-  // LOG simple para confirmar que la app está corriendo
-  console.log("ROAD VALUATION APP RUNNING - STEP:", step);
-
-  const handleNext = async () => {
-    // Paso 1 → Generar comparables
-    if (step === 1) {
-      if (!data.industry || !data.mrr) {
-        alert("Por favor completa la Industria y el MRR para continuar.");
-        return;
-      }
-
-      setLoadingBenchmarks(true);
-      setStep(2); // Pasar a la UI de comparables mientras se cargan
-
-      try {
-        const result = await generateBenchmarks(data);
-        setBenchmarks(result);
-      } catch (error) {
-        console.error("Error al generar benchmarks con Gemini:", error);
-
-        // Fallback automático para que la app NO se caiga en producción
-        const fallbackBenchmarks: Benchmark[] = [
-          {
-            name: "SaaS Early Benchmark",
-            country: data.country || "USA",
-            evMrrMultiple: 8,
-            evRevenueMultiple: 6,
-            evUserMultiple: 120,
-            rationale:
-              "Benchmark de respaldo automático cuando la generación con IA falla o no está configurada.",
-          },
-          {
-            name: "Startup Growth Ref",
-            country: "Global",
-            evMrrMultiple: 10,
-            evRevenueMultiple: 7,
-            evUserMultiple: 150,
-            rationale:
-              "Múltiplos genéricos de mercado para startups en etapa Pre-Seed / Seed.",
-          },
-        ];
-
-        setBenchmarks(fallbackBenchmarks);
-        alert(
-          "No se pudo conectar con Gemini para generar comparables.\nUsaremos benchmarks de respaldo para que puedas seguir con la valoración."
-        );
-      } finally {
-        setLoadingBenchmarks(false);
-      }
-    }
-    // Paso 2 → Ir a ajustes de riesgo
-    else if (step === 2) {
-      setStep(3);
-    }
-    // Paso 3 → Calcular valoración
-    else if (step === 3) {
-      const result = calculateValuation(data, benchmarks, adjustments);
-      setValuationResult(result);
-      setStep(4);
-    }
-  };
-
-  const handleBack = () => setStep(Math.max(1, step - 1));
-
-  const steps = [
-    { id: 1, name: "Datos", icon: Layers },
-    { id: 2, name: "Comparables", icon: PieChart },
-    { id: 3, name: "Ajustes", icon: Sliders },
-    { id: 4, name: "Valoración", icon: Check },
-  ];
-
   return (
-    <div className="min-h-screen bg-slate-50 text-slate-900 pb-20 print:pb-0 print:bg-white">
-      {/* HEADER */}
-      <header className="bg-slate-900 text-white pt-8 pb-24 px-4 sm:px-6 lg:px-8 no-print border-b border-slate-800">
-        <div className="max-w-6xl mx-auto flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
-          <div>
-            {/* Logo Road Valuation */}
-            <RoadLogo
-              variant="horizontal"
-              theme="white"
-              width={220}
-              className="mb-3"
-            />
-            <p className="text-slate-400 text-lg max-w-xl">
-              Valoración profesional por múltiplos comparables para startups
-              Pre-Seed y Seed.
-            </p>
-          </div>
-          <div className="hidden md:block text-right">
-            <div className="inline-flex items-center px-3 py-1 rounded-full bg-indigo-900/50 border border-indigo-500/30 text-indigo-300 text-xs font-medium uppercase tracking-wider">
-              Powered by Road Consulting
-            </div>
-          </div>
-        </div>
-      </header>
+    <div className="min-h-screen bg-slate-50 flex flex-col items-center justify-center px-6">
 
-      {/* MAIN */}
-      <main className="max-w-5xl mx-auto -mt-16 px-4 sm:px-6 lg:px-8 print:mt-0 print:max-w-none print:px-0 print:mx-0">
-        {/* Indicador de pasos */}
-        <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-4 mb-8 flex justify-between items-center overflow-x-auto no-print">
-          {steps.map((s, idx) => (
-            <div key={s.id} className="flex items-center min-w-fit">
-              <div
-                className={`flex items-center justify-center w-10 h-10 rounded-full border-2 ${
-                  step >= s.id
-                    ? "border-indigo-600 bg-indigo-50 text-indigo-600"
-                    : "border-slate-200 text-slate-300"
-                }`}
-              >
-                <s.icon className="w-5 h-5" />
-              </div>
-              <span
-                className={`ml-3 font-medium text-sm ${
-                  step >= s.id ? "text-slate-800" : "text-slate-400"
-                }`}
-              >
-                {s.name}
-              </span>
-              {idx < steps.length - 1 && (
-                <div className="w-12 h-0.5 bg-slate-100 mx-4 hidden md:block"></div>
-              )}
-            </div>
-          ))}
-        </div>
+      {/* Logo */}
+      <div className="mb-8">
+        <RoadLogo variant="horizontal" theme="light" width={220} />
+      </div>
 
-        {/* Contenido por paso */}
-        <div className="space-y-6 print:space-y-0">
-          {/* Paso 1: Formulario de datos */}
-          {step === 1 && (
-            <div className="animate-in slide-in-from-right-8 duration-300">
-              <InputForm data={data} onChange={setData} />
-            </div>
-          )}
+      {/* Título */}
+      <h1 className="text-4xl font-bold text-slate-800 mb-4">
+        SeedValuate Pro
+      </h1>
 
-          {/* Paso 2: Comparables */}
-          {step === 2 && (
-            <div className="animate-in slide-in-from-right-8 duration-300">
-              <BenchmarkTable
-                benchmarks={benchmarks}
-                loading={loadingBenchmarks}
-                onRegenerate={async () => {
-                  setLoadingBenchmarks(true);
-                  try {
-                    const res = await generateBenchmarks(data);
-                    setBenchmarks(res);
-                  } catch (error) {
-                    console.error(
-                      "Error al regenerar benchmarks con Gemini:",
-                      error
-                    );
-                    alert(
-                      "No se pudo regenerar comparables con Gemini. Mantendremos los actuales."
-                    );
-                  } finally {
-                    setLoadingBenchmarks(false);
-                  }
-                }}
-              />
-            </div>
-          )}
+      {/* Subtítulo */}
+      <p className="text-lg text-slate-600 max-w-xl text-center mb-10">
+        Plataforma de valorización de startups en etapa Pre-Seed y Seed
+        basada en comparables de mercado.
+      </p>
 
-          {/* Paso 3: Ajustes de riesgo */}
-          {step === 3 && (
-            <div className="animate-in slide-in-from-right-8 duration-300 bg-white p-8 rounded-xl shadow-sm border border-slate-200">
-              <div className="flex items-center gap-3 mb-6 border-b border-slate-100 pb-4">
-                <Sliders className="text-indigo-600 w-6 h-6" />
-                <div>
-                  <h3 className="text-xl font-bold text-slate-800">
-                    Ajustes de Riesgo y Calidad
-                  </h3>
-                  <p className="text-slate-500 text-sm">
-                    Factores cualitativos que impactan tu premio o descuento
-                    sobre la valoración.
-                  </p>
-                </div>
-              </div>
+      {/* Tarjeta principal */}
+      <div className="bg-white shadow-lg rounded-xl p-8 w-full max-w-md text-center border border-slate-200">
+        <p className="text-slate-700 mb-6">
+          ✅ Tu aplicación está funcionando correctamente en Vercel.
+        </p>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                <div>
-                  <label className="block font-medium text-slate-700 mb-2">
-                    Equipo Fundador
-                  </label>
-                  <select
-                    className="w-full p-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none"
-                    value={adjustments.teamQuality}
-                    onChange={(e) =>
-                      setAdjustments({
-                        ...adjustments,
-                        teamQuality: e.target.value as any,
-                      })
-                    }
-                  >
-                    <option value="solo">Fundador Único (-10%)</option>
-                    <option value="duo">2-3 Fundadores (Estándar)</option>
-                    <option value="experienced_team">
-                      Equipo Experimentado (+15%)
-                    </option>
-                  </select>
-                </div>
-                <div>
-                  <label className="block font-medium text-slate-700 mb-2">
-                    Madurez del Producto
-                  </label>
-                  <select
-                    className="w-full p-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none"
-                    value={adjustments.productStage}
-                    onChange={(e) =>
-                      setAdjustments({
-                        ...adjustments,
-                        productStage: e.target.value as any,
-                      })
-                    }
-                  >
-                    <option value="mvp">MVP / Prototipo</option>
-                    <option value="beta">Beta Privada</option>
-                    <option value="pmf">PMF Temprano</option>
-                  </select>
-                </div>
-                <div>
-                  <label className="block font-medium text-slate-700 mb-2">
-                    Densidad de Competencia
-                  </label>
-                  <select
-                    className="w-full p-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none"
-                    value={adjustments.competition}
-                    onChange={(e) =>
-                      setAdjustments({
-                        ...adjustments,
-                        competition: e.target.value as any,
-                      })
-                    }
-                  >
-                    <option value="saturated">Saturada / Alta</option>
-                    <option value="moderate">Moderada</option>
-                    <option value="blue_ocean">Océano Azul / Baja</option>
-                  </select>
-                </div>
-              </div>
+        <button
+          onClick={() => alert("¡Todo funcionando correctamente 🚀!")}
+          className="bg-indigo-600 hover:bg-indigo-700 transition text-white py-3 px-6 rounded-lg font-semibold"
+        >
+          Probar funcionamiento
+        </button>
+      </div>
 
-              <div className="mt-8 p-4 bg-amber-50 rounded-lg border border-amber-100 flex gap-3">
-                <AlertTriangle className="text-amber-600 shrink-0" />
-                <p className="text-sm text-amber-800">
-                  Los descuentos calculados también se aplican automáticamente
-                  según Runway ({data.runwayMonths} meses) y crecimiento de MRR
-                  ({data.mrrGrowth}% mensual) que ingresaste previamente.
-                </p>
-              </div>
-            </div>
-          )}
-
-          {/* Paso 4: Resultado de la valoración */}
-          {step === 4 && valuationResult && (
-            <ResultsView
-              result={valuationResult}
-              data={data}
-              benchmarks={benchmarks}
-            />
-          )}
-        </div>
-
-        {/* Navegación inferior */}
-        <div className="mt-8 flex justify-between items-center no-print">
-          <button
-            onClick={handleBack}
-            disabled={step === 1}
-            className={`px-6 py-3 rounded-lg font-medium transition ${
-              step === 1
-                ? "opacity-0 pointer-events-none"
-                : "text-slate-600 hover:bg-slate-200"
-            }`}
-          >
-            Atrás
-          </button>
-
-          {step < 4 && (
-            <button
-              onClick={handleNext}
-              disabled={loadingBenchmarks}
-              className="flex items-center gap-2 bg-indigo-600 text-white px-8 py-3 rounded-lg font-medium hover:bg-indigo-700 transition shadow-lg disabled:opacity-70 disabled:cursor-not-allowed"
-            >
-              {loadingBenchmarks
-                ? "Procesando..."
-                : step === 3
-                ? "Calcular Valoración"
-                : "Siguiente Paso"}
-              {!loadingBenchmarks && (
-                <ChevronRight className="w-4 h-4" />
-              )}
-            </button>
-          )}
-        </div>
-      </main>
+      {/* Footer */}
+      <footer className="mt-14 text-sm text-slate-400">
+        Powered by Road Consulting
+      </footer>
     </div>
   );
 };
 
 export default App;
+
