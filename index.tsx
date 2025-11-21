@@ -3,16 +3,12 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Road Valuation | Valorización de Startups</title>
+    <title>SeedValuate Pro | Valorización de Startups</title>
 
-    <!-- Tailwind por CDN (opcional, lo puedes mantener) -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <link
-      href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap"
-      rel="stylesheet"
-    />
-
-    <!-- LIBRERÍAS PDF GLOBALES (para html2canvas + jsPDF) -->
+    
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 
@@ -20,6 +16,12 @@
       body {
         font-family: 'Inter', sans-serif;
         background-color: #f8fafc;
+        margin: 0;
+        padding: 0;
+      }
+
+      #root {
+        min-height: 100vh;
       }
 
       #pdf-content {
@@ -27,10 +29,13 @@
       }
     </style>
   </head>
+
   <body>
     <div id="root"></div>
 
-    <!-- 🔹 AQUÍ es donde realmente se monta React con Vite -->
-    <script type="module" src="/main.tsx"></script>
+    <!-- ESTA LÍNEA ES LA CLAVE -->
+    <script type="module" src="/src/main.tsx"></script>
+
   </body>
 </html>
+
