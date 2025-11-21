@@ -1,44 +1,28 @@
+// App.tsx – Test mínimo
+
 import React from "react";
-import RoadLogo from "./components/RoadLogo";
 
 const App: React.FC = () => {
   return (
-    <div className="min-h-screen bg-slate-50 flex flex-col items-center justify-center px-6">
-
-      {/* Logo */}
-      <div className="mb-8">
-        <RoadLogo variant="horizontal" theme="light" width={220} />
-      </div>
-
-      {/* Título */}
-      <h1 className="text-4xl font-bold text-slate-800 mb-4">
-        SeedValuate Pro
+    <div
+      style={{
+        minHeight: "100vh",
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "center",
+        justifyContent: "center",
+        backgroundColor: "#0f172a",
+        color: "white",
+        fontFamily: "system-ui, -apple-system, BlinkMacSystemFont, 'Inter', sans-serif",
+      }}
+    >
+      <h1 style={{ fontSize: "32px", marginBottom: "16px" }}>
+        ✅ Road Valuation está funcionando
       </h1>
-
-      {/* Subtítulo */}
-      <p className="text-lg text-slate-600 max-w-xl text-center mb-10">
-        Plataforma de valorización de startups en etapa Pre-Seed y Seed
-        basada en comparables de mercado.
+      <p style={{ fontSize: "18px", maxWidth: 600, textAlign: "center", opacity: 0.9 }}>
+        Si ves este mensaje, el problema NO es Vercel ni Vite, sino algún error en el
+        componente original <code>App.tsx</code> o en sus imports.
       </p>
-
-      {/* Tarjeta principal */}
-      <div className="bg-white shadow-lg rounded-xl p-8 w-full max-w-md text-center border border-slate-200">
-        <p className="text-slate-700 mb-6">
-          ✅ Tu aplicación está funcionando correctamente en Vercel.
-        </p>
-
-        <button
-          onClick={() => alert("¡Todo funcionando correctamente 🚀!")}
-          className="bg-indigo-600 hover:bg-indigo-700 transition text-white py-3 px-6 rounded-lg font-semibold"
-        >
-          Probar funcionamiento
-        </button>
-      </div>
-
-      {/* Footer */}
-      <footer className="mt-14 text-sm text-slate-400">
-        Powered by Road Consulting
-      </footer>
     </div>
   );
 };
